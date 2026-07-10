@@ -1,22 +1,34 @@
+import CommonsPage from "./commons.page";
 import type { Locator, Page } from "@playwright/test";
 
-export default class LoginPage {
-  private readonly SignupLoginLink: Locator;
-  private readonly NewUserSignupHeader: Locator;
+export default class LoginPage extends CommonsPage {
+  private readonly newUserSignupHeader: Locator;
+  private readonly loginHeader: Locator;
   private readonly nameInput: Locator;
   private readonly emailInput: Locator;
+  private readonly passwordInput: Locator;
   private readonly signupButton: Locator;
+  private readonly loginButton: Locator;
+  private readonly loginErrorMessage: Locator;
 
-  constructor(private page: Page) {
-    this.SignupLoginLink = this.page.getByRole("link", {
-      name: / Signup \/ Login/,
-    });
-    this.NewUserSignupHeader = this.page.getByRole("heading", {
+  constructor(protected page: Page) {
+    super(page);
+
+    this.newUserSignupHeader = this.page.getByRole("heading", {
       name: "New User Signup!",
     });
+    this.loginHeader = this.page.getByRole("heading", {
+      name: "Login to your account",
+    });
+
     this.nameInput = this.page.getByRole("textbox", { name: "Name" });
     this.emailInput = this.page.getByRole("textbox", { name: "Email Address" });
+    this.passwordInput = this.page.getByRole("textbox", { name: "Password" });
     this.signupButton = this.page.getByRole("button", { name: "Signup" });
+    this.loginButton = this.page.getByRole("button", { name: "Login" });
+    this.loginErrorMessage = this.page.getByText(
+      "Your email or password is incorrect!",
+    );
   }
 
   async goto() {
@@ -24,11 +36,15 @@ export default class LoginPage {
   }
 
   async clickSignupLoginLink() {
-    await this.SignupLoginLink.click();
+    await this.signupLoginLink.click();
   }
 
   async waitForNewUserSignupHeaderVisible() {
-    await this.NewUserSignupHeader.waitFor({ state: "visible" });
+    await this.newUserSignupHeader.waitFor({ state: "visible" });
+  }
+
+  async waitForLoginHeaderVisible() {
+    await this.loginHeader.waitFor({ state: "visible" });
   }
 
   async fillName(name: string) {
@@ -48,7 +64,25 @@ export default class LoginPage {
     }
   }
 
+  async fillPassword(password: string) {
+    await this.passwordInput.fill(password);
+  }
+
   async clickSignup() {
     await this.signupButton.click();
+  }
+
+  async clickLogin() {
+    await this.loginButton.click();
+  }
+
+  async login(email: string, password: string) {
+    await this.fillEmail(email, "login");
+    await this.fillPassword(password);
+    await this.clickLogin();
+  }
+
+  get errorMessage() {
+    return this.loginErrorMessage;
   }
 }
