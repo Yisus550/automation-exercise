@@ -1,11 +1,11 @@
 import UserFactory from "@/src/data/factories/user.factory";
 import { expect, test } from "./setup";
 import type { UserModel } from "@/src/data/models/user.model";
-
-let userData: UserModel;
-const REGISTERED_EMAIL = "tests@correo.com";
+import { VALID_EMAIL } from "./login.spec";
 
 test.describe("Signup workflow", () => {
+  let userData: UserModel;
+
   test.beforeEach(async ({ page, loginPage }) => {
     await loginPage.goto();
     await page.route("**/*googleads*", (route) => route.abort());
@@ -51,6 +51,8 @@ test.describe("Signup workflow", () => {
 });
 
 test.describe("/login - Name and Email", () => {
+  let userData: UserModel;
+
   test.beforeEach(async ({ page, loginPage }) => {
     await loginPage.goto();
     await page.route("**/*googleads*", (route) => route.abort());
@@ -109,7 +111,7 @@ test.describe("/login - Name and Email", () => {
     await test.step("Fill valid name and an already-registered email, then click Signup", async () => {
       userData = UserFactory.create().addFullUser().build();
       await loginPage.fillName(userData.firstName);
-      await loginPage.fillEmail(REGISTERED_EMAIL, "signup");
+      await loginPage.fillEmail(VALID_EMAIL, "signup");
       await loginPage.clickSignup();
     });
 
@@ -120,6 +122,8 @@ test.describe("/login - Name and Email", () => {
 });
 
 test.describe("/signup - Account Information", () => {
+  let userData: UserModel;
+
   test.beforeEach(async ({ page, loginPage, signupPage }) => {
     await loginPage.goto();
     await page.route("**/*googleads*", (route) => route.abort());
