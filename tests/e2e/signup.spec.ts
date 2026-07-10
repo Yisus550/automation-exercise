@@ -120,7 +120,10 @@ test.describe("/login - Name and Email", () => {
 });
 
 test.describe("/signup - Account Information", () => {
-  test.beforeEach(async ({ loginPage, signupPage }) => {
+  test.beforeEach(async ({ page, loginPage, signupPage }) => {
+    await loginPage.goto();
+    await page.route("**/*googleads*", (route) => route.abort());
+    await page.route("**/*doubleclick.net*", (route) => route.abort());
     userData = UserFactory.create().addFullUser().build();
     await loginPage.fillName(userData.firstName);
     await loginPage.fillEmail(userData.email, "signup");
@@ -168,6 +171,82 @@ test.describe("/signup - Account Information", () => {
       await signupPage.fillPersonalInformation(userData);
       await signupPage.fillPreferences(userData);
       await signupPage.fillAddressInformationWithoutLastName(userData);
+      await signupPage.clickCreateAccount();
+    });
+
+    await test.step("Verify that the page stays on /signup", async () => {
+      expect(page.url()).toContain("/signup");
+    });
+  });
+
+  test("should not allow account creation with letters in zipcode", async ({
+    page,
+    signupPage,
+  }) => {
+    await test.step("Fill all fields with a zipcode containing letters and click Create Account", async () => {
+      await signupPage.fillPersonalInformation(userData);
+      await signupPage.fillPreferences(userData);
+      await signupPage.fillAddressInformationWithCustomZipcode(
+        userData,
+        "ABCDE",
+      );
+      await signupPage.clickCreateAccount();
+    });
+
+    await test.step("Verify that the page stays on /signup", async () => {
+      expect(page.url()).toContain("/signup");
+    });
+  });
+
+  test("should not allow account creation with symbols in zipcode", async ({
+    page,
+    signupPage,
+  }) => {
+    await test.step("Fill all fields with a zipcode containing symbols and click Create Account", async () => {
+      await signupPage.fillPersonalInformation(userData);
+      await signupPage.fillPreferences(userData);
+      await signupPage.fillAddressInformationWithCustomZipcode(
+        userData,
+        "12@34",
+      );
+      await signupPage.clickCreateAccount();
+    });
+
+    await test.step("Verify that the page stays on /signup", async () => {
+      expect(page.url()).toContain("/signup");
+    });
+  });
+
+  test("should not allow account creation with letters in mobile number", async ({
+    page,
+    signupPage,
+  }) => {
+    await test.step("Fill all fields with a mobile number containing letters and click Create Account", async () => {
+      await signupPage.fillPersonalInformation(userData);
+      await signupPage.fillPreferences(userData);
+      await signupPage.fillAddressInformationWithCustomMobileNumber(
+        userData,
+        "ABC123",
+      );
+      await signupPage.clickCreateAccount();
+    });
+
+    await test.step("Verify that the page stays on /signup", async () => {
+      expect(page.url()).toContain("/signup");
+    });
+  });
+
+  test("should not allow account creation with symbols in mobile number", async ({
+    page,
+    signupPage,
+  }) => {
+    await test.step("Fill all fields with a mobile number containing symbols and click Create Account", async () => {
+      await signupPage.fillPersonalInformation(userData);
+      await signupPage.fillPreferences(userData);
+      await signupPage.fillAddressInformationWithCustomMobileNumber(
+        userData,
+        "555-1234",
+      );
       await signupPage.clickCreateAccount();
     });
 
