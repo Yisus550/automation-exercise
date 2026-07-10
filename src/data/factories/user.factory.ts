@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
-import { UserModel } from "../models/user.model";
 import Countries from "../models/countries.enum";
+import type { UserModel } from "../models/user.model";
 
 export default class UserFactory {
   private user = {} as UserModel;
@@ -14,6 +14,7 @@ export default class UserFactory {
   addFullUser(): this {
     this.user = {
       // ------ Personal information ------
+      name: faker.person.fullName(),
       title: faker.helpers.arrayElement(["Mr.", "Mrs."]),
       email: faker.internet.email(),
       password: faker.internet.password({ length: 8 }),
@@ -74,6 +75,11 @@ export default class UserFactory {
     this.user.zipcode = faker.location.zipCode();
     this.user.mobileNumber = faker.phone.number();
 
+    return this;
+  }
+
+  withEmail(email: string): this {
+    this.user.email = email;
     return this;
   }
 
