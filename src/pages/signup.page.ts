@@ -158,6 +158,38 @@ export default class SignupPage extends CommonsPage {
     await this.mobileNumberInput.fill(data.mobileNumber);
   }
 
+  async fillAddressInformationWithCustomZipcode(
+    data: UserModel,
+    zipcode: string,
+  ) {
+    await this.firstNameInput.fill(data.firstName);
+    await this.lastNameInput.fill(data.lastName);
+    await this.companyInput.fill(data.company);
+    await this.address1Input.fill(data.address1);
+    await this.address2Input.fill(data.address2);
+    await this.countryCombobox.selectOption({ label: data.country });
+    await this.stateInput.fill(data.state);
+    await this.cityInput.fill(data.city);
+    await this.zipcodeInput.fill(zipcode);
+    await this.mobileNumberInput.fill(data.mobileNumber);
+  }
+
+  async fillAddressInformationWithCustomMobileNumber(
+    data: UserModel,
+    mobileNumber: string,
+  ) {
+    await this.firstNameInput.fill(data.firstName);
+    await this.lastNameInput.fill(data.lastName);
+    await this.companyInput.fill(data.company);
+    await this.address1Input.fill(data.address1);
+    await this.address2Input.fill(data.address2);
+    await this.countryCombobox.selectOption({ label: data.country });
+    await this.stateInput.fill(data.state);
+    await this.cityInput.fill(data.city);
+    await this.zipcodeInput.fill(data.zipcode);
+    await this.mobileNumberInput.fill(mobileNumber);
+  }
+
   async clickCreateAccount() {
     await this.createAccountButton.click();
   }
