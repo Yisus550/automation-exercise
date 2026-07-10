@@ -2,9 +2,10 @@ import UserFactory from "@/src/data/factories/user.factory";
 import { expect, test } from "./setup";
 import type { UserModel } from "@/src/data/models/user.model";
 
-test.describe("Signup", () => {
-  let userData: UserModel;
+let userData: UserModel;
+const REGISTERED_EMAIL = "tests@correo.com";
 
+test.describe("Signup workflow", () => {
   test.beforeEach(async ({ page, loginPage }) => {
     await loginPage.goto();
     await page.route("**/*googleads*", (route) => route.abort());
@@ -45,6 +46,133 @@ test.describe("Signup", () => {
 
       await expect(signupPage.logoutButton).toBeVisible();
       await expect(signupPage.deleteAccountButton).toBeVisible();
+    });
+  });
+});
+
+test.describe("/login - Name and Email", () => {
+  test.beforeEach(async ({ page, loginPage }) => {
+    await loginPage.goto();
+    await page.route("**/*googleads*", (route) => route.abort());
+    await page.route("**/*doubleclick.net*", (route) => route.abort());
+  });
+
+  test("should not allow signup with empty name", async ({
+    page,
+    loginPage,
+  }) => {
+    await test.step("Leave name empty, fill valid email and click Signup", async () => {
+      userData = UserFactory.create().addFullUser().build();
+      await loginPage.fillEmail(userData.email, "signup");
+      await loginPage.clickSignup();
+    });
+
+    await test.step("Verify that the page stays on /login", async () => {
+      expect(page.url()).toContain("/login");
+    });
+  });
+
+  test("should not allow signup with empty email", async ({
+    page,
+    loginPage,
+  }) => {
+    await test.step("Fill valid name, leave email empty and click Signup", async () => {
+      userData = UserFactory.create().addFullUser().build();
+      await loginPage.fillName(userData.firstName);
+      await loginPage.clickSignup();
+    });
+
+    await test.step("Verify that the page stays on /login", async () => {
+      expect(page.url()).toContain("/login");
+    });
+  });
+
+  test("should not allow signup with invalid email format", async ({
+    page,
+    loginPage,
+  }) => {
+    await test.step("Fill valid name and an email without @ symbol, then click Signup", async () => {
+      userData = UserFactory.create().addFullUser().build();
+      await loginPage.fillName(userData.firstName);
+      await loginPage.fillEmail("invalidemail", "signup");
+      await loginPage.clickSignup();
+    });
+
+    await test.step("Verify that the page stays on /login", async () => {
+      expect(page.url()).toContain("/login");
+    });
+  });
+
+  test("should display an error when the email is already registered", async ({
+    loginPage,
+  }) => {
+    await test.step("Fill valid name and an already-registered email, then click Signup", async () => {
+      userData = UserFactory.create().addFullUser().build();
+      await loginPage.fillName(userData.firstName);
+      await loginPage.fillEmail(REGISTERED_EMAIL, "signup");
+      await loginPage.clickSignup();
+    });
+
+    await test.step("Verify that the existing email error message is shown", async () => {
+      await expect(loginPage.existingEmailError).toBeVisible();
+    });
+  });
+});
+
+test.describe("/signup - Account Information", () => {
+  test.beforeEach(async ({ loginPage, signupPage }) => {
+    userData = UserFactory.create().addFullUser().build();
+    await loginPage.fillName(userData.firstName);
+    await loginPage.fillEmail(userData.email, "signup");
+    await loginPage.clickSignup();
+    await signupPage.waitForAccountInformationHeader();
+  });
+
+  test("should not allow account creation with empty password", async ({
+    page,
+    signupPage,
+  }) => {
+    await test.step("Fill all fields except password and click Create Account", async () => {
+      await signupPage.fillPersonalInformationWithoutPassword(userData);
+      await signupPage.fillPreferences(userData);
+      await signupPage.fillAddressInformation(userData);
+      await signupPage.clickCreateAccount();
+    });
+
+    await test.step("Verify that the page stays on /signup", async () => {
+      expect(page.url()).toContain("/signup");
+    });
+  });
+
+  test("should not allow account creation with empty first name", async ({
+    page,
+    signupPage,
+  }) => {
+    await test.step("Fill all fields except first name and click Create Account", async () => {
+      await signupPage.fillPersonalInformation(userData);
+      await signupPage.fillPreferences(userData);
+      await signupPage.fillAddressInformationWithoutFirstName(userData);
+      await signupPage.clickCreateAccount();
+    });
+
+    await test.step("Verify that the page stays on /signup", async () => {
+      expect(page.url()).toContain("/signup");
+    });
+  });
+
+  test("should not allow account creation with empty last name", async ({
+    page,
+    signupPage,
+  }) => {
+    await test.step("Fill all fields except last name and click Create Account", async () => {
+      await signupPage.fillPersonalInformation(userData);
+      await signupPage.fillPreferences(userData);
+      await signupPage.fillAddressInformationWithoutLastName(userData);
+      await signupPage.clickCreateAccount();
+    });
+
+    await test.step("Verify that the page stays on /signup", async () => {
+      expect(page.url()).toContain("/signup");
     });
   });
 });
