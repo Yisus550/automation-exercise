@@ -1,6 +1,6 @@
 import { expect, test } from "./setup";
 
-const VALID_EMAIL = "tests@correo.com";
+export const VALID_EMAIL = "tests@correo.com";
 const VALID_PASSWORD = "Testing123";
 
 test.describe("Login", () => {
