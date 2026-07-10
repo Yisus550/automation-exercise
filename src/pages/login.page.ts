@@ -10,6 +10,7 @@ export default class LoginPage extends CommonsPage {
   private readonly signupButton: Locator;
   private readonly loginButton: Locator;
   private readonly loginErrorMessage: Locator;
+  private readonly existingEmailErrorMessage: Locator;
 
   constructor(protected page: Page) {
     super(page);
@@ -28,6 +29,9 @@ export default class LoginPage extends CommonsPage {
     this.loginButton = this.page.getByRole("button", { name: "Login" });
     this.loginErrorMessage = this.page.getByText(
       "Your email or password is incorrect!",
+    );
+    this.existingEmailErrorMessage = this.page.getByText(
+      "Email Address already exist!",
     );
   }
 
@@ -84,5 +88,9 @@ export default class LoginPage extends CommonsPage {
 
   get errorMessage() {
     return this.loginErrorMessage;
+  }
+
+  get existingEmailError() {
+    return this.existingEmailErrorMessage;
   }
 }
